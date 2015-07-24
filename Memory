@@ -1,0 +1,82 @@
+# implementation of card game - Memory
+
+import simplegui
+import random
+
+lst1=[0,1,2,3,4,5,6,7]
+lst2=[1,0,2,4,3,5,6,7]
+expose=[False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False]
+lst1.extend(lst2)
+random.shuffle(lst1)
+state=0
+idx1=0
+idx2=0
+counter=0
+
+# helper function to initialize globals
+def new_game():
+    global expose,lst1
+    for idx in range(len(expose)):
+        expose[idx]=False
+        random.shuffle(lst1)
+    
+
+     
+# define event handlers
+def mouseclick(pos):
+    global expose,state,lst1,idx1,idx2,counter
+    # add game state logic here
+    click_position=pos[0]//50
+    
+    if state==0:
+            expose[click_position]=True
+            state=1
+            idx1=click_position
+    elif state==1:
+        if expose[click_position]==False:
+            expose[click_position]=True
+            state=2
+            idx2=click_position
+            counter+=1
+    elif state==2:
+        if lst1[idx1]!=lst1[idx2]:
+            expose[idx1]=False
+            expose[idx2]=False
+            if expose[click_position]==False:
+                expose[click_position]=True
+                state=1
+                idx1=click_position
+                
+        else:
+            expose[click_position]=True
+            state=1
+            idx1=click_position
+     
+    
+                        
+# cards are logically 50x100 pixels in size    
+def draw(canvas):
+    global lst1,expose,counter
+    for idx in range(len(lst1)):
+        if expose[idx] == False:
+            canvas.draw_line((50*idx,0),(50*idx,100), 5, 'Black')
+        else:
+            canvas.draw_polygon(((50*idx,0),((50*idx)+50,0),(((50*idx)+50),100),(50*idx,100)), 5, 'White','White')
+            canvas.draw_text(str(lst1[idx]),((50*idx)+25,50), 20, 'Black')
+            label.set_text('Turns='+str(counter))
+
+# create frame and add a button and labels
+frame = simplegui.create_frame("Memory", 800, 100)
+frame.set_canvas_background('Green')
+frame.add_button("Reset", new_game)
+label = frame.add_label("Turns = 0")
+
+
+# register event handlers
+frame.set_mouseclick_handler(mouseclick)
+frame.set_draw_handler(draw)
+
+# get things rolling
+new_game()
+frame.start()
+
